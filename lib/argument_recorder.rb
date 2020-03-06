@@ -30,7 +30,6 @@ module ArgumentRecorder
             examples: [],
           }
         end
-        # binding.pry
 
         # Copy the original method
         alias_method "original_#{method_name}".to_sym, method_name
@@ -39,23 +38,26 @@ module ArgumentRecorder
         remove_method method_name
 
         # Redifine the method
-        define_method(method_name) do |*arguments|
-          # Record data about the arguments
-          self.class.instance_variable_get(:@argument_recordings)[method_name].tap do |method_storage|
-            arguments.each_with_index do |argument_value, argument_index|
-              if argument_value.is_a?(Hash)
-                argument_value.each do |key, value|
-                  method_storage[key][:examples].push(value)
-                end
-              else
-                method_storage[method_storage.keys[argument_index]][:examples].push argument_value
-              end
-            end
-          end
+        create_wrapper_method(method_name)
+      end
+    end
 
-          # Call the original method
-          send("original_#{method_name}".to_sym, *arguments)
+    def create_wrapper_method(method_name)
+      method_storage = instance_variable_get(:@argument_recordings)[method_name]
+
+      define_method(method_name) do |*arguments, **keyword_arguments, &block|
+        # Record data about the arguments
+        arguments.each_with_index do |argument_value, argument_index|
+          method_storage[method_storage.keys[argument_index]][:examples].push argument_value
         end
+
+        # Record data about the keyword arguments
+        keyword_arguments.each do |key, value|
+          method_storage[key][:examples].push(value)
+        end
+
+        # Call the original method
+        send("original_#{method_name}".to_sym, *arguments, **keyword_arguments, &block)
       end
     end
 

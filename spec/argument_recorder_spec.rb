@@ -10,6 +10,10 @@ RSpec.describe ArgumentRecorder do
       "#{kind} : #{message}"
     end
 
+    def explore(&block)
+      block.call('result')
+    end
+
     record_arguments
   end
 
@@ -18,17 +22,27 @@ RSpec.describe ArgumentRecorder do
   end
 
   it 'calls method with simple required arguments' do
-    puts "1 plus 5 is #{SampleClass.new.add(1, 5)}"
-    puts "2 plus 9 is #{SampleClass.new.add(2, 9)}"
-    puts "3 plus 27 is #{SampleClass.new.add(3, 27)}"
+    expect(SampleClass.new.add(1, 5)).to eq 6
+    expect(SampleClass.new.add(2, 9)).to eq 11
+    expect(SampleClass.new.add(3, 27)).to eq 30
   end
 
   it 'calls method with a keyword containing default' do
-    puts SampleClass.new.display_icon(kind: :notice, message: "It's OK")
-    puts SampleClass.new.display_icon(kind: :alert, message: 'SOMETHING IS WRONG')
+    expect(SampleClass.new.display_icon(kind: :success, message: 'The object was created successfully.'))
+      .to eq('success : The object was created successfully.')
+    expect(SampleClass.new.display_icon(kind: :notice, message: 'The object is invalid.'))
+      .to eq('notice : The object is invalid.')
+    expect(SampleClass.new.display_icon(kind: :alert, message: 'There was a profound error!'))
+      .to eq('alert : There was a profound error!')
+  end
+
+  it 'calls method with a block' do
+    expect do |probe|
+      SampleClass.new.explore(&probe)
+    end.to yield_with_args 'result'
   end
 
   it 'recorded something' do
-    expect(SampleClass.instance_variable_get(:@argument_recordings)).to eq({ add: {} })
+    pp SampleClass.instance_variable_get(:@argument_recordings)
   end
 end

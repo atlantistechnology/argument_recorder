@@ -10,7 +10,7 @@ Gem::Specification.new do |spec|
 
   spec.summary       = 'Automatically document arguments for each of your methods.'
   spec.description   = "Passively gather information about project-defined method calls and the parameters that they're receiving in order to generate documentation"
-  spec.homepage      = 'https://github.com/atlantistech/argument_recorder'
+  spec.homepage      = 'https://github.com/atlantistechnology/argument_recorder'
   spec.license       = 'MIT'
   spec.extra_rdoc_files = Dir["README.md", "CHANGELOG.md", "LICENSE.txt"]
   spec.required_ruby_version = '>= 2.0.0'
@@ -21,7 +21,7 @@ Gem::Specification.new do |spec|
     spec.metadata['allowed_push_host'] = "TODO: Set to 'http://mygemserver.com'"
 
     spec.metadata['homepage_uri'] = spec.homepage
-    spec.metadata['source_code_uri'] = 'https://github.com/atlantistech/argument_recorder'
+    spec.metadata['source_code_uri'] = 'https://github.com/atlantistechnology/argument_recorder'
     spec.metadata['changelog_uri'] = 'https://github.com/atlantistechnology/argument_recorder/blob/master/CHANGELOG.md'
   else
     raise 'RubyGems 2.0 or newer is required to protect against ' \

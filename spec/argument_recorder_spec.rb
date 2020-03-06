@@ -43,6 +43,6 @@ RSpec.describe ArgumentRecorder do
   end
 
   it 'recorded something' do
-    pp SampleClass.instance_variable_get(:@argument_recordings)
+    SampleClass.display_argument_data
   end
 end

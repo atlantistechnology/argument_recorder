@@ -66,5 +66,22 @@ module ArgumentRecorder
         instance_method(method_name).arity.positive?
       end
     end
+
+    def display_argument_data
+      relevant_methods_names.each do |method_name|
+        puts method_name
+        puts "  Methods:"
+        instance_variable_get(:@argument_recordings).each do |(method_name, argument_data)|
+          # binding.pry
+          puts "  Method: #{method_name}"
+          argument_data.each do |(parameter_name, parameter_data)|
+            puts "    Parameter Name: #{parameter_name}"
+            puts "      Type: #{parameter_data[:type]}"
+            puts "      Examples: #{parameter_data[:examples]}"
+          end
+        end
+      end
+
+    end
   end
 end

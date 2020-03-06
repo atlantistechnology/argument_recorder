@@ -12,6 +12,8 @@ Gem::Specification.new do |spec|
   spec.description   = "Passively gather information about project-defined method calls and the parameters that they're receiving in order to generate documentation"
   spec.homepage      = 'https://github.com/atlantistech/argument_recorder'
   spec.license       = 'MIT'
+  spec.extra_rdoc_files = Dir["README.md", "CHANGELOG.md", "LICENSE.txt"]
+  spec.required_ruby_version = '>= 2.0.0'
 
   # Prevent pushing this gem to RubyGems.org. To allow pushes either set the 'allowed_push_host'
   # to allow pushing to a single host or delete this section to allow pushing to any host.
@@ -36,6 +38,8 @@ Gem::Specification.new do |spec|
   spec.require_paths = ['lib']
 
   spec.add_development_dependency 'bundler', '~> 2.1.2'
+  spec.add_development_dependency 'guard', '~> 2.16'
+  spec.add_development_dependency 'guard-rspec'
   spec.add_development_dependency 'rake', '~> 13.0'
   spec.add_development_dependency 'rspec', '~> 3.0'
 end

@@ -56,13 +56,13 @@ module ArgumentRecorder
         end
 
         # Call the original method
-        if RUBY_VERSION > '2.4.0'
-          send("original_#{method_name}".to_sym, *arguments, **keyword_arguments, &block)
+        if RUBY_VERSION > '2.7.0'
+          send("original_#{method_name}".to_sym, *arguments, **keyword_arguments)
         else
           if keyword_arguments.any?
-            send("original_#{method_name}".to_sym, **keyword_arguments, &block)
+            send("original_#{method_name}".to_sym, **keyword_arguments)
           else
-            send("original_#{method_name}".to_sym, *arguments, &block)
+            send("original_#{method_name}".to_sym, *arguments)
           end
         end
       end

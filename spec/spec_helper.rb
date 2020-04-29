@@ -1,4 +1,3 @@
-require 'bundler/setup'
 require 'argument_recorder'
 
 RSpec.configure do |config|

@@ -5,15 +5,19 @@ RSpec.describe ArgumentRecorder do
     def add(number1, number2)
       number1 + number2
     end
-
+    
     def display_icon(kind: 'alert', message:)
       "#{kind} : #{message}"
     end
-
+    
+    def with_default(param_a, param_b = false)
+      "param_a is #{param_a}, param_b is #{param_b}"
+    end
+    
     def explore(&block)
       block.call('result')
     end
-
+    
     record_arguments
   end
 
@@ -34,6 +38,11 @@ RSpec.describe ArgumentRecorder do
       .to eq('notice : The object is invalid.')
     expect(SampleClass.new.display_icon(kind: :alert, message: 'There was a profound error!'))
       .to eq('alert : There was a profound error!')
+  end
+
+  it 'calls method with a default' do
+    expect(SampleClass.new.with_default('a')).to eq 'param_a is a, param_b is false'
+    expect(SampleClass.new.with_default('c', true)).to eq 'param_a is c, param_b is true'
   end
 
   it 'calls method with a block' do

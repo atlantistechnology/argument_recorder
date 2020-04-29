@@ -1,5 +1,4 @@
 require 'argument_recorder/version'
-require 'pry'
 
 module ArgumentRecorder
   class Error < StandardError; end
@@ -57,31 +56,38 @@ module ArgumentRecorder
         end
 
         # Call the original method
-        send("original_#{method_name}".to_sym, *arguments, **keyword_arguments, &block)
+        if RUBY_VERSION > '2.4.0'
+          send("original_#{method_name}".to_sym, *arguments, **keyword_arguments, &block)
+        else
+          if keyword_arguments.any?
+            send("original_#{method_name}".to_sym, **keyword_arguments, &block)
+          else
+            send("original_#{method_name}".to_sym, *arguments, &block)
+          end
+        end
       end
     end
 
     def relevant_methods_names
       (instance_methods - Object.methods).select do |method_name|
-        instance_method(method_name).arity.positive?
+        next if instance_method(method_name).arity.zero?
+
+        next unless instance_method(method_name).owner == self
+
+        true
       end
     end
 
     def display_argument_data
-      relevant_methods_names.each do |method_name|
-        puts method_name
-        puts "  Methods:"
-        instance_variable_get(:@argument_recordings).each do |(method_name, argument_data)|
-          # binding.pry
-          puts "  Method: #{method_name}"
-          argument_data.each do |(parameter_name, parameter_data)|
-            puts "    Parameter Name: #{parameter_name}"
-            puts "      Type: #{parameter_data[:type]}"
-            puts "      Examples: #{parameter_data[:examples]}"
-          end
+      puts "\e[32m#{relevant_methods_names.length} Relevant methods found.\e[0m"
+      instance_variable_get(:@argument_recordings).each do |(method_name, argument_data)|
+        puts "   \e[44m:#{method_name}\e[0m"
+        argument_data.each do |(parameter_name, parameter_data)|
+          puts "     Parameter Name: #{parameter_name}"
+          puts "       Type: #{parameter_data[:type]}"
+          puts "       Examples: #{parameter_data[:examples]}"
         end
       end
-
     end
   end
 end

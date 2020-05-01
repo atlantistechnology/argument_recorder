@@ -1,5 +1,7 @@
 lib = File.expand_path('lib', __dir__)
-$LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
+unless $LOAD_PATH.include?(lib)
+  $LOAD_PATH.unshift(lib)
+end
 require 'argument_recorder/version'
 
 Gem::Specification.new do |spec|
@@ -12,7 +14,7 @@ Gem::Specification.new do |spec|
   spec.description   = "Passively gather information about project-defined method calls and the parameters that they're receiving in order to generate documentation"
   spec.homepage      = 'https://github.com/atlantistechnology/argument_recorder'
   spec.license       = 'MIT'
-  spec.extra_rdoc_files = Dir["README.md", "CHANGELOG.md", "LICENSE.txt"]
+  spec.extra_rdoc_files = Dir['README.md', 'CHANGELOG.md', 'LICENSE.txt']
   spec.required_ruby_version = '>= 2.0.0'
 
   # Prevent pushing this gem to RubyGems.org. To allow pushes either set the 'allowed_push_host'
@@ -36,10 +38,13 @@ Gem::Specification.new do |spec|
   spec.bindir        = 'exe'
   spec.executables   = spec.files.grep(%r{^exe/}) { |f| File.basename(f) }
   spec.require_paths = ['lib']
-  
+
+  spec.add_development_dependency 'awesome_print'
   spec.add_development_dependency 'bundler'
   spec.add_development_dependency 'guard', '~> 2.16'
   spec.add_development_dependency 'guard-rspec'
   spec.add_development_dependency 'rake', '~> 13.0'
   spec.add_development_dependency 'rspec', '~> 3.0'
+  spec.add_development_dependency 'rubocop'
+  spec.add_development_dependency 'yard'
 end

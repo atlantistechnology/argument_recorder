@@ -5,19 +5,19 @@ RSpec.describe ArgumentRecorder do
     def add(number1, number2)
       number1 + number2
     end
-    
+
     def display_icon(kind: 'alert', message:)
       "#{kind} : #{message}"
     end
-    
+
     def with_default(param_a, param_b = false)
       "param_a is #{param_a}, param_b is #{param_b}"
     end
-    
+
     def explore(&block)
       block.call('result')
     end
-    
+
     record_arguments
   end
 
@@ -52,6 +52,6 @@ RSpec.describe ArgumentRecorder do
   end
 
   it 'recorded something' do
-    SampleClass.display_argument_data
+    ArgumentRecorder.display_argument_data
   end
 end

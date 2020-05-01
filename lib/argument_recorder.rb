@@ -1,73 +1,108 @@
 require 'argument_recorder/version'
+require 'argument_recorder/storage'
+require 'argument_recorder/instance_method'
 
+require 'awesome_print'
+require 'pry'
+
+# Main entrypoint.
+# @since 0.1.1
+#
+# @example
+#   class SampleClass
+#     include ArgumentRecorder
+#
+#     def sample_method
+#     end
+#
+#     record_arguments
+#   end
+#
 module ArgumentRecorder
   class Error < StandardError; end
-  # Your code goes here...
 
+  # Initialize storage and inject functionality
+  # @param [Class] parent_class
+  # @return [NilClass]
   def self.included(parent_class)
+    ArgumentRecorder::STORAGE ||= Storage.new
     parent_class.extend(ClassMethods)
+    nil
   end
 
+  # puts formatted contents of ArgumentRecorder::STORAGE
+  # @return [NilClass]
+  def self.display_argument_data
+    # ap ArgumentRecorder::STORAGE.recordings
+    # puts "\n\n"
+
+    ArgumentRecorder::STORAGE.each_class do |class_name, data|
+      puts "\e[44m#{class_name.ljust(100, ' ')}\e[0m"
+      data.each do |method_name, method_details|
+        instance_method = InstanceMethod.new(
+          method_name: method_name,
+          source_location: method_details[:source_location],
+          parameters: method_details[:parameters],
+          examples: method_details[:examples],
+        )
+        puts instance_method.to_rdoc
+        puts "\n\n"
+      end
+      nil
+    end
+  end
+
+  # Namespace for methods added to target classes whose methods we want to record
+  # @since 0.1.1
   module ClassMethods
+
+    # Initialize recording for each relevant method by
+    #  1. Notifying Storage of the method
+    #  2. Alias the original method to the "original_" namespace
+    #  3. Remove the original method
+    #  4. Create the wrapper method
+    # @return [NilClass]
     def record_arguments
-      @argument_recordings = {}
-
       relevant_methods_names.each do |method_name| # symbol
-        @argument_recordings[method_name] = {}
-
-        # type can be:
-        # :req - required argument
-        # :opt - optional argument
-        # :rest - rest of arguments as array
-        # :keyreq - reguired key argument (2.1+)
-        # :key - key argument
-        # :keyrest - rest of key arguments as Hash
-        # :block - block parameter
-        instance_method(method_name).parameters.each do |type, parameter_name|
-          @argument_recordings[method_name][parameter_name] = {
-            type: type,
-            examples: [],
-          }
-        end
+        ArgumentRecorder::STORAGE.initialize_method(instance_method(method_name))
 
         # Copy the original method
-        alias_method "original_#{method_name}".to_sym, method_name
+        alias_method("original_#{method_name}".to_sym, method_name)
 
         # Remove the original method
-        remove_method method_name
+        remove_method(method_name)
 
         # Redifine the method
         create_wrapper_method(method_name)
       end
+      nil
     end
 
+    # Create a wrapper method which records example calls and then send the arguments on
+    # to the original method
+    # @return [NilClass]
     def create_wrapper_method(method_name)
-      method_storage = instance_variable_get(:@argument_recordings)[method_name]
-
-      define_method(method_name) do |*arguments, **keyword_arguments, &block|
-        # Record data about the arguments
-        arguments.each_with_index do |argument_value, argument_index|
-          method_storage[method_storage.keys[argument_index]][:examples].push argument_value
-        end
-
-        # Record data about the keyword arguments
-        keyword_arguments.each do |key, value|
-          method_storage[key][:examples].push(value)
-        end
+      define_method(method_name) do |*arguments, **keyword_arguments|
+        ArgumentRecorder::STORAGE.record_example(
+          class_name: self.class.to_s,
+          method_name: method_name,
+          arguments: arguments,
+          keyword_arguments: keyword_arguments,
+        )
 
         # Call the original method
-        if RUBY_VERSION > '2.7.0'
-          send("original_#{method_name}".to_sym, *arguments, **keyword_arguments)
+        if keyword_arguments.any?
+          send("original_#{method_name}".to_sym, **keyword_arguments)
         else
-          if keyword_arguments.any?
-            send("original_#{method_name}".to_sym, **keyword_arguments)
-          else
-            send("original_#{method_name}".to_sym, *arguments)
-          end
+          send("original_#{method_name}".to_sym, *arguments)
         end
       end
+      nil
     end
 
+    # Methods for which we'd like to record example calls. Currently defined as instance methods
+    # owned / defined by this object and that receive at least one argument.
+    # @return [Array<Symbol>]
     def relevant_methods_names
       (instance_methods - Object.methods).select do |method_name|
         next if instance_method(method_name).arity.zero?
@@ -75,18 +110,6 @@ module ArgumentRecorder
         next unless instance_method(method_name).owner == self
 
         true
-      end
-    end
-
-    def display_argument_data
-      puts "\e[32m#{relevant_methods_names.length} Relevant methods found.\e[0m"
-      instance_variable_get(:@argument_recordings).each do |(method_name, argument_data)|
-        puts "   \e[44m:#{method_name}\e[0m"
-        argument_data.each do |(parameter_name, parameter_data)|
-          puts "     Parameter Name: #{parameter_name}"
-          puts "       Type: #{parameter_data[:type]}"
-          puts "       Examples: #{parameter_data[:examples]}"
-        end
       end
     end
   end

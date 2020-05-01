@@ -21,20 +21,27 @@ Or install it yourself as:
 ## Usage
 
 ```
+require 'argument_recorder'
+
 class YourClass
   include ArgumentRecorder
   
-  def your_method_definition
+  def your_method_definition(param1)
   	# ...
   end
   
-  def another_method_definition
+  def another_method_definition(keyword_a:, keyword_b: :active)
   	# ...
   end
   
   # This goes at the bottom of your class definition!
   record_arguments
 end
+
+YourClass.new.your_method_definition('Awesome!')
+YourClass.new.another_method_definition(keyword_a: 'Ben Folds', keyword_b: :very_active)
+
+ArgumentRecorder.display_argument_data
 ```
 
 

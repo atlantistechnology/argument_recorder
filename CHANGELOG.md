@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.3] - 2020-05-04
+### Added
+* Handle *splats
+### Changed
+* Change namespacing of dyamically redefined methods
+* Update Readme
+
 ## [0.1.2] - 2020-04-29
 ### Added
 * Storage: receive and handle data sent by the recorder

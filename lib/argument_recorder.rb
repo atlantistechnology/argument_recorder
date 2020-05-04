@@ -67,7 +67,7 @@ module ArgumentRecorder
         ArgumentRecorder::STORAGE.initialize_method(instance_method(method_name))
 
         # Copy the original method
-        alias_method("original_#{method_name}".to_sym, method_name)
+        alias_method("__argument_recorder_#{method_name}".to_sym, method_name)
 
         # Remove the original method
         remove_method(method_name)
@@ -92,9 +92,9 @@ module ArgumentRecorder
 
         # Call the original method
         if keyword_arguments.any?
-          send("original_#{method_name}".to_sym, **keyword_arguments)
+          send("__argument_recorder_#{method_name}".to_sym, **keyword_arguments)
         else
-          send("original_#{method_name}".to_sym, *arguments)
+          send("__argument_recorder_#{method_name}".to_sym, *arguments)
         end
       end
       nil

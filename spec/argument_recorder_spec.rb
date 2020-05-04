@@ -14,6 +14,10 @@ RSpec.describe ArgumentRecorder do
       "param_a is #{param_a}, param_b is #{param_b}"
     end
 
+    def with_splat(*args)
+      "args is #{args}"
+    end
+
     def explore(&block)
       block.call('result')
     end
@@ -43,6 +47,12 @@ RSpec.describe ArgumentRecorder do
   it 'calls method with a default' do
     expect(SampleClass.new.with_default('a')).to eq 'param_a is a, param_b is false'
     expect(SampleClass.new.with_default('c', true)).to eq 'param_a is c, param_b is true'
+  end
+
+  it 'calls method with a splat' do
+    expect(SampleClass.new.with_splat(['a'])).to eq 'args is [["a"]]'
+    expect(SampleClass.new.with_splat('a')).to eq 'args is ["a"]'
+    expect(SampleClass.new.with_splat('a', 'b')).to eq 'args is ["a", "b"]'
   end
 
   it 'calls method with a block' do

@@ -44,6 +44,10 @@ YourClass.new.another_method_definition(keyword_a: 'Ben Folds', keyword_b: :very
 ArgumentRecorder.display_argument_data
 ```
 
+## TODO
+* Investigate better ways of doing the metaprogramming
+* Record Caller information in Examples
+* Evolve Storage
 
 ## Contributing
 

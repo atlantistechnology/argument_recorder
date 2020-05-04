@@ -50,12 +50,12 @@ module ArgumentRecorder
     # :block - block parameter
     def line_for_param(parameter_name, _parameter_details)
       case @parameters[parameter_name][:type]
-      when :req, :opt
+      when :req, :opt, :rest
         "  @param #{parameter_name} [#{class_from_example_objects(@examples.map { |e| e.arguments[@parameters.keys.index(parameter_name)] }).join(', ')}]"
       when :keyreq, :key
         "  @param #{parameter_name} [#{class_from_example_objects(@examples.map { |e| e.keyword_arguments[parameter_name] }).join(', ')}]"
       else
-        "  @param #{parameter_name} [UNKNOWN]"
+        "  @param #{parameter_name} [UNKNOWN : #{@parameters[parameter_name][:type]}]"
       end
     end
 

@@ -2,17 +2,18 @@ require 'argument_recorder/example_call'
 
 module ArgumentRecorder
   class Storage
-    attr_reader :recordings
+    attr_reader :examples
 
     # @return [Storage]
     def initialize
-      @recordings = {}
+      @methods = {}
+      @examples = {}
     end
 
-    # @yield [class_name, data] class_name is a String, data is a Hash
-    def each_class
-      @recordings.each do |class_name, data|
-        yield class_name, data
+    # @yield [method, data] method is an UnboundMethod, data is a Hash
+    def each_method
+      @methods.each do |method, data|
+        yield method, data
       end
     end
 
@@ -24,28 +25,31 @@ module ArgumentRecorder
     # :key - key argument
     # :keyrest - rest of key arguments as Hash
     # :block - block parameter
-    # 
-    # @param [Symbol] method Initialize the method in storage by recording the method name, source, and param details
+
+    # @param [UnboundMethod] method Initialize the method in storage by adding it to @methods registry and initializing a space in @examples
     # @return [NilClass]
     def initialize_method(method)
-      target_class = method.owner
+      # # puts " \e[42m\e[30mIntializing ##{method_name} with #{method.parameters.length} parameters\e[0m\e[0m"
+      return if @methods.key?(method)
+
       method_name = method.original_name
+      original_method = method.owner.instance_method("__argument_recorder_#{method_name}".to_sym)
 
-      # puts " \e[42m\e[30mIntializing #{target_class}##{method_name} with #{target_class.instance_method(method_name).parameters.length} parameters\e[0m\e[0m"
-
-      @recordings[target_class.to_s] ||= {}
-      @recordings[target_class.to_s][method_name] ||= {
-        source_location: target_class.instance_method(method_name).source_location,
+      @methods[method] ||= {
+        name: method.original_name,
+        original_source_location: original_method.source_location,
         parameters: {},
-        examples: [],
       }
 
-      target_class.instance_method(method_name).parameters.each_with_index do |(type, parameter_name), index|
-        @recordings[target_class.to_s][method_name][:parameters][parameter_name] = {
+      original_method.parameters.each_with_index do |(type, parameter_name), index|
+        @methods[method][:parameters][parameter_name] = {
           position: index,
           type: type,
         }
       end
+
+      @examples[method] ||= []
+
       nil
     end
 
@@ -54,11 +58,12 @@ module ArgumentRecorder
     # @param [Array] arguments
     # @param [Hash] keyword_arguments
     def record_example(class_name:, method_name:, arguments:, keyword_arguments:)
-      @recordings[class_name][method_name][:examples].push(
+      method = Module.const_get(class_name).instance_method(method_name)
+      initialize_method(method)
+
+      @examples[method].push(
         ExampleCall.new(method_name: method_name, arguments: arguments, keyword_arguments: keyword_arguments),
       )
-    rescue => error
-      puts "[ArgumentRecorder::Storage#record_example] #{error}"
     end
   end
 end

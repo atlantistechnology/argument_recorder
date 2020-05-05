@@ -44,6 +44,21 @@ YourClass.new.another_method_definition(keyword_a: 'Ben Folds', keyword_b: :very
 ArgumentRecorder.display_argument_data
 ```
 
+```
+# In a Rails project
+class ApplicationController < ActionController::Base
+  after_action :display_arguments
+
+  # Your actions
+
+  private
+
+  def display_arguments
+    ArgumentRecorder.display_argument_data
+  end
+end
+```
+
 ## TODO
 * Investigate better ways of doing the metaprogramming
 * Record Caller information in Examples

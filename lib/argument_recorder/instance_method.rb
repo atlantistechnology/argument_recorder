@@ -21,8 +21,7 @@ module ArgumentRecorder
     # @return [String] RDOC for the instance method
     def to_rdoc
       [
-        "  \e[44m#{@source_location.join(':').ljust(98, ' ')}\e[0m",
-        "  \e[44m##{@method_name.to_s.ljust(97, ' ')}\e[0m",
+        "  \e[44m##{@method_name} [line #{@source_location.last}]\e[0m",
         '',
         examples_as_rdoc,
         '',
@@ -37,7 +36,7 @@ module ArgumentRecorder
 
     # @return [String] RDOC examples
     def examples_as_rdoc
-      @examples.map(&:to_rdoc).join("\n")
+      @examples.map(&:to_rdoc).uniq.join("\n")
     end
 
     # parameter#type can be:
@@ -50,12 +49,12 @@ module ArgumentRecorder
     # :block - block parameter
     def line_for_param(parameter_name, _parameter_details)
       case @parameters[parameter_name][:type]
-      when :req, :opt, :rest
-        "  @param #{parameter_name} [#{class_from_example_objects(@examples.map { |e| e.arguments[@parameters.keys.index(parameter_name)] }).join(', ')}]"
+      when :req, :opt, :rest, :keyrest
+        "  @param [#{class_from_example_objects(@examples.map { |e| e.arguments[@parameters.keys.index(parameter_name)] }).join(', ')}] #{parameter_name}"
       when :keyreq, :key
-        "  @param #{parameter_name} [#{class_from_example_objects(@examples.map { |e| e.keyword_arguments[parameter_name] }).join(', ')}]"
+        "  @param [#{class_from_example_objects(@examples.map { |e| e.keyword_arguments[parameter_name] }).join(', ')}] #{parameter_name}"
       else
-        "  @param #{parameter_name} [UNKNOWN : #{@parameters[parameter_name][:type]}]"
+        "  @param [UNKNOWN : #{@parameters[parameter_name][:type]}] #{parameter_name}"
       end
     end
 

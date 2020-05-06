@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.1.4] - 2020-05-08
+### Changed
+* Separate @methods and @examples in storage
+* The new UnboundMethod itself is now the key for storage operations. Class names and method names were not playing well with inheritence and the dynamic nature of ruby classes.
+* Updated documentation
+
 ## [0.1.3] - 2020-05-04
 ### Added
 * Handle *splats

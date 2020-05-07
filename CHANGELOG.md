@@ -1,6 +1,14 @@
 # Changelog
 
-## [0.1.4] - 2020-05-08
+## [0.1.5] - 2020-05-07
+### Added
+* Now recording (and displaying) the first line of the #caller.
+### Fixed
+* Methods which take a Hash as a second parameter are confused with keywords. This prevents original code from breaking, but still creates some problems for us that have to be addressed - specifically around identifying @param types.
+### Removed
+* Rubocop as a dev dependency
+
+## [0.1.4] - 2020-05-06
 ### Changed
 * Separate @methods and @examples in storage
 * The new UnboundMethod itself is now the key for storage operations. Class names and method names were not playing well with inheritence and the dynamic nature of ruby classes.

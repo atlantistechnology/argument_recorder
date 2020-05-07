@@ -5,7 +5,7 @@ module ArgumentRecorder
   # @attr_reader [Array] arguments normal arguments that were passed to the call
   # @attr_reader [Hash] keyword_arguments keyword arguments that were passed to the call
   class ExampleCall
-    attr_reader :arguments, :keyword_arguments
+    attr_reader :arguments, :keyword_arguments, :calling_line
 
     # @example
     #  ExampleCall.new(method_name: :add, arguments: [1, 2])
@@ -16,10 +16,11 @@ module ArgumentRecorder
     # @param arguments [Array]
     # @param keyword_arguments [Hash]
     # @return [ExampleCall]
-    def initialize(method_name:, arguments: [], keyword_arguments: [])
+    def initialize(method_name:, arguments: [], keyword_arguments: [], calling_line: nil)
       @method_name = method_name
       @arguments = arguments
       @keyword_arguments = keyword_arguments
+      @calling_line = calling_line
     end
 
     # @return [String] of an RDOC example

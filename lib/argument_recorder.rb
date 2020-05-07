@@ -34,7 +34,13 @@ module ArgumentRecorder
   # @return [NilClass]
   def self.display_argument_data
     ArgumentRecorder::STORAGE.each_method do |method, data|
-      puts "\e[44m#{data[:original_source_location].join(':').ljust(100, ' ')}\e[0m"
+      puts "\e[44mDefined: #{data[:original_source_location].join(':').ljust(100, ' ')}\e[0m"
+
+      puts "\e[32mCalled from:"
+      ArgumentRecorder::STORAGE.examples[method].map(&:calling_line).uniq do |line|
+        puts "* #{line&.split(':')&.take(2)&.join(':')}"
+      end
+      puts "\e[0m\n"
 
       instance_method = InstanceMethod.new(
         method_name: data[:name],
@@ -92,6 +98,7 @@ module ArgumentRecorder
           method_name: method_name,
           arguments: arguments,
           keyword_arguments: keyword_arguments,
+          calling_line: caller[0],
         )
 
         # Call the original method

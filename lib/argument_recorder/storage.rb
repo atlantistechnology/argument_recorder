@@ -57,12 +57,17 @@ module ArgumentRecorder
     # @param [Symbol] method_name
     # @param [Array] arguments
     # @param [Hash] keyword_arguments
-    def record_example(class_name:, method_name:, arguments:, keyword_arguments:)
+    def record_example(class_name:, method_name:, arguments:, keyword_arguments:, calling_line:)
       method = Module.const_get(class_name).instance_method(method_name)
       initialize_method(method)
 
       @examples[method].push(
-        ExampleCall.new(method_name: method_name, arguments: arguments, keyword_arguments: keyword_arguments),
+        ExampleCall.new(
+          method_name: method_name, 
+          arguments: arguments, 
+          keyword_arguments: keyword_arguments,
+          calling_line: calling_line,
+        ),
       )
     end
   end

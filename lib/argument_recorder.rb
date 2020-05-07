@@ -96,7 +96,7 @@ module ArgumentRecorder
 
         # Call the original method
         if keyword_arguments.any?
-          send("__argument_recorder_#{method_name}".to_sym, **keyword_arguments)
+          send("__argument_recorder_#{method_name}".to_sym, *arguments, **keyword_arguments)
         else
           send("__argument_recorder_#{method_name}".to_sym, *arguments)
         end

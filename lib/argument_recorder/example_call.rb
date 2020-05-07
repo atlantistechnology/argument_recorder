@@ -26,8 +26,7 @@ module ArgumentRecorder
     def to_rdoc
       [
         "  @example\n    #{@method_name}(",
-        argument_examples,
-        keyword_argument_examples,
+        [argument_examples, keyword_argument_examples].reject(&:empty?).join(', '),
         ')',
       ].join('')
     end
@@ -55,7 +54,7 @@ module ArgumentRecorder
       when String then "\"#{value}\""
       when Symbol then ":#{value}"
       else
-        value
+        value.to_s
       end
     end
   end

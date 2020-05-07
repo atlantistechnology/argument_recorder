@@ -18,6 +18,10 @@ RSpec.describe ArgumentRecorder do
       "args is #{args}"
     end
 
+    def mixed_arguments(param_a, options)
+      "#{param_a} #{options.map { |key, value| "#{key}:#{value}" }.join}"
+    end
+
     def explore(&block)
       block.call('result')
     end
@@ -59,6 +63,10 @@ RSpec.describe ArgumentRecorder do
     expect do |probe|
       SampleClass.new.explore(&probe)
     end.to yield_with_args 'result'
+  end
+
+  it 'calls with mixed arguments' do
+    expect(SampleClass.new.mixed_arguments('name', { precision: 2 })).to eq 'name precision:2'
   end
 
   it 'recorded something' do

@@ -69,6 +69,10 @@ RSpec.describe ArgumentRecorder do
     expect(SampleClass.new.mixed_arguments('name', { precision: 2 })).to eq 'name precision:2'
   end
 
+  it '.formatted_argument_data is a String' do
+    expect(ArgumentRecorder.formatted_argument_data).to be_a String
+  end
+
   it 'recorded something' do
     ArgumentRecorder.display_argument_data
   end

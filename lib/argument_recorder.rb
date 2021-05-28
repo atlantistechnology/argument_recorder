@@ -30,29 +30,61 @@ module ArgumentRecorder
     nil
   end
 
-  # puts formatted contents of ArgumentRecorder::STORAGE
-  # @return [NilClass]
-  def self.display_argument_data
+  # Formatted contents of `ArgumentRecorder::STORAGE`
+  #
+  # @return [String]
+  def self.formatted_argument_data
+    return_string = ''
+
     ArgumentRecorder::STORAGE.each_method do |method, data|
-      puts "\e[44mDefined: #{data[:original_source_location].join(':').ljust(100, ' ')}\e[0m"
-
-      puts "\e[32mCalled from:"
-      ArgumentRecorder::STORAGE.examples[method].map(&:calling_line).uniq do |line|
-        puts "* #{line&.split(':')&.take(2)&.join(':')}"
-      end
-      puts "\e[0m\n"
-
-      instance_method = InstanceMethod.new(
-        method_name: data[:name],
-        source_location: data[:original_source_location],
-        parameters: data[:parameters],
-        examples: ArgumentRecorder::STORAGE.examples[method],
-      )
-      puts instance_method.to_rdoc
-      puts "\n\n"
-
-      nil
+      return_string << formatted_information_for_method(method, data)
     end
+
+    return_string
+  end
+
+  # puts formatted contents of `ArgumentRecorder::STORAGE`
+  #
+  # @return [nil]
+  def self.display_argument_data
+    puts formatted_argument_data
+  end
+
+  # Details about a given method
+  #
+  # @param [UnboundMethod] method
+  # @param [Hash] data
+  #
+  # @example
+  #    'Defined: /var/project/argument_recorder/spec/inherited_class_spec.rb:5
+  #    Called from:
+  #    * /var/project/argument_recorder/spec/inherited_class_spec.rb:17
+  #    #  #add [line 5]
+  #    #
+  #    #  @example
+  #    #    add(1, 5)
+  #    #
+  #    #  @param [Integer] number1
+  #    #  @param [Integer] number2'
+  #
+  # @return [String]
+  def self.formatted_information_for_method(method, data)
+    return_string = "\e[44mDefined: #{data[:original_source_location].join(':').ljust(100, ' ')}\e[0m\n"
+
+    return_string << [
+      "\e[32mCalled from:\n", # green
+      ArgumentRecorder::STORAGE.lines_where_method_was_called(method).join("\n"),
+      "\e[0m\n", # end green
+    ].join
+
+    instance_method = InstanceMethod.new(
+      method_name: data[:name],
+      source_location: data[:original_source_location],
+      parameters: data[:parameters],
+      examples: ArgumentRecorder::STORAGE.examples[method],
+    )
+    return_string << instance_method.to_rdoc
+    return_string << "\n\n"
   end
 
   # Namespace for methods added to target classes whose methods we want to record
@@ -72,8 +104,6 @@ module ArgumentRecorder
           puts "[ArgumentRecorder::ClassMethods.create_wrapper_method] WARNING! :__argument_recorder_#{method_name} ALREADY EXISTS!"
           next
         end
-
-        # ArgumentRecorder::STORAGE.initialize_method(instance_method(method_name))
 
         # Copy the original method
         alias_method("__argument_recorder_#{method_name}".to_sym, method_name)
@@ -116,13 +146,17 @@ module ArgumentRecorder
     # @return [Array<Symbol>]
     def relevant_method_names
       (instance_methods - Object.methods).select do |method_name|
-        next if instance_method(method_name).arity.zero?
+        next if method_name =~ /__argument_recorder/
+
+        instance_method = instance_method(method_name)
+
+        next if instance_method.arity.zero?
 
         # The method must be owned by the class that is calling #relevant_method_names
-        next unless instance_method(method_name).owner == self
+        next unless instance_method.owner == self
 
         # The method must be defined somewhere inside the current working directory
-        next unless instance_method(method_name).source_location[0].include?(Dir.pwd)
+        next unless instance_method.source_location[0].include?(Dir.pwd)
 
         true
       end

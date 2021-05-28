@@ -30,6 +30,7 @@ module ArgumentRecorder
         end,
         '',
       ].join("\n")
+        .gsub(/^/, '#') # Add comment prefixes
     end
 
     private
@@ -50,11 +51,27 @@ module ArgumentRecorder
     def line_for_param(parameter_name, _parameter_details)
       case @parameters[parameter_name][:type]
       when :req, :opt, :rest, :keyrest
-        "  @param [#{class_from_example_objects(@examples.map { |e| e.arguments[@parameters.keys.index(parameter_name)] }).join(', ')}] #{parameter_name}"
+        "  @param [#{class_from_example_objects(arguments_for_parameter(parameter_name)).join(', ')}] #{parameter_name}"
       when :keyreq, :key
-        "  @param [#{class_from_example_objects(@examples.map { |e| e.keyword_arguments[parameter_name] }).join(', ')}] #{parameter_name}"
+        "  @param [#{class_from_example_objects(arguments_for_keyword_parameter(parameter_name)).join(', ')}] #{parameter_name}"
       else
-        "  @param [UNKNOWN : #{@parameters[parameter_name][:type]}] #{parameter_name}"
+        "  @param [UNKNOWN TYPE : #{parameter_name}"
+      end
+    end
+
+    # @param [Symbol] parameter_name
+    # @return [Array] An array of sample arguments that have been passed for this parameter
+    def arguments_for_parameter(parameter_name)
+      @examples.map do |example|
+        example.arguments[@parameters.keys.index(parameter_name)]
+      end
+    end
+
+    # @param [Symbol] parameter_name
+    # @return [Array] An array of sample keyword arguments that have been passed for this parameter
+    def arguments_for_keyword_parameter(parameter_name)
+      @examples.map do |example|
+        example.keyword_arguments[parameter_name]
       end
     end
 

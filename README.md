@@ -44,6 +44,18 @@ YourClass.new.another_method_definition(keyword_a: 'Ben Folds', keyword_b: :very
 ArgumentRecorder.display_argument_data
 ```
 
+Alternate installation:
+```
+# config/environments/development.rb
+
+SampleClass.include(ArgumentRecorder)
+
+config.after_initialize do
+  SampleClass.record_arguments
+end
+
+```
+
 ```
 # In a Rails project
 class ApplicationController < ActionController::Base
@@ -54,7 +66,7 @@ class ApplicationController < ActionController::Base
   private
 
   def display_arguments
-    ArgumentRecorder.display_argument_data
+    Rails.logger.debug ArgumentRecorder.formatted_argument_data
   end
 end
 ```
